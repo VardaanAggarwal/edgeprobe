@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: edgeprobe
+      POSTGRES_USER: edgeprobe
+      POSTGRES_PASSWORD: edgeprobe
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edgeprobe -d edgeprobe"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
